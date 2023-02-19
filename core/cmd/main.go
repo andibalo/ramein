@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/andibalo/ramein/core"
 	"github.com/andibalo/ramein/core/internal/config"
 	"github.com/andibalo/ramein/core/internal/db"
@@ -20,7 +19,7 @@ func main() {
 
 	// Listen from a different goroutine
 	go func() {
-		if err := server.Listen(":8000"); err != nil {
+		if err := server.Listen(cfg.AppAddress()); err != nil {
 			log.Panic(err)
 		}
 	}()
@@ -29,13 +28,13 @@ func main() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
 	_ = <-c
-	fmt.Println("Gracefully shutting down...")
+	cfg.Logger().Info("Gracefully shutting down...")
 	_ = server.Shutdown()
 
-	fmt.Println("Running cleanup tasks...")
+	cfg.Logger().Info("Running cleanup tasks...")
 
 	// Your cleanup tasks go here
 	// db.Close()
 	// redisConn.Close()
-	fmt.Println("Fiber was successful shutdown.")
+	cfg.Logger().Info("Fiber was successful shutdown.")
 }

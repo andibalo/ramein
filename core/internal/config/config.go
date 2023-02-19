@@ -8,6 +8,7 @@ import (
 )
 
 const (
+	AppAddress         = ":8000"
 	EnvDevEnvironment  = "DEV"
 	EnvProdEnvironment = "PROD"
 )
@@ -17,6 +18,9 @@ type Config interface {
 	StorageConfig() db
 
 	AppEnv() string
+	AppAddress() string
+
+	DBConnString() string
 }
 
 type AppConfig struct {
@@ -95,4 +99,12 @@ func (c *AppConfig) StorageConfig() db {
 
 func (c *AppConfig) AppEnv() string {
 	return c.App.AppEnv
+}
+
+func (c *AppConfig) AppAddress() string {
+	return AppAddress
+}
+
+func (c *AppConfig) DBConnString() string {
+	return c.StorageConfig().DSN
 }

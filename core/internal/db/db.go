@@ -11,14 +11,14 @@ import (
 )
 
 func InitDB(cfg config.Config) *bun.DB {
-	connStr := cfg.StorageConfig().DSN
+	connStr := cfg.DBConnString()
 	// open database
 
 	db := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(connStr)))
 
 	pgdb := bun.NewDB(db, pgdialect.New())
 
-	if cfg.AppEnv() == config.EnvDevEnvironment {
+	if cfg.AppEnv() == "DEV" {
 		pgdb.AddQueryHook(bundebug.NewQueryHook(
 			bundebug.WithVerbose(true),
 			bundebug.FromEnv("BUNDEBUG"),
