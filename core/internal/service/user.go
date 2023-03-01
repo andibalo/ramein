@@ -7,6 +7,7 @@ import (
 	"github.com/andibalo/ramein/core/internal/request"
 	"github.com/andibalo/ramein/core/internal/util"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"net/http"
 )
@@ -50,8 +51,10 @@ func (s *userService) mapCreateUserReqToUserModel(data *request.RegisterUserRequ
 		return model.User{}, fiber.NewError(http.StatusInternalServerError, "Failed to hash password")
 	}
 
+	id := "USER-" + uuid.NewString()
+
 	return model.User{
-		ID:              "",
+		ID:              id,
 		Email:           data.Email,
 		FirstName:       data.FirstName,
 		LastName:        data.LastName,
