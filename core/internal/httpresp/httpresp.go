@@ -70,7 +70,7 @@ func HttpRespError(c *fiber.Ctx, err error) error {
 	return c.Status(code).JSON(jsonErrResp)
 }
 
-func HttpRespSuccess(c *fiber.Ctx, data interface{}, pagination *Pagination) {
+func HttpRespSuccess(c *fiber.Ctx, data interface{}, pagination *Pagination) error {
 
 	//check typenya slice / array , soalnya kalo bukan slice / array ga perlu di dikosongin datanya soalnya udah kena error di handler
 	kind := reflect.ValueOf(data).Kind()
@@ -84,7 +84,7 @@ func HttpRespSuccess(c *fiber.Ctx, data interface{}, pagination *Pagination) {
 
 	c.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
 
-	c.Status(fiber.StatusOK).JSON(Response{
+	return c.Status(fiber.StatusOK).JSON(Response{
 		Data:       data,
 		Pagination: pagination,
 		Success:    "success",

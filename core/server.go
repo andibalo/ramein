@@ -5,6 +5,8 @@ import (
 	v1 "github.com/andibalo/ramein/core/internal/api/v1"
 	"github.com/andibalo/ramein/core/internal/config"
 	"github.com/andibalo/ramein/core/internal/httpresp"
+	"github.com/andibalo/ramein/core/internal/repository"
+	"github.com/andibalo/ramein/core/internal/service"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/uptrace/bun"
@@ -20,7 +22,12 @@ func NewServer(cfg config.Config, db *bun.DB) *fiber.App {
 	})
 
 	app.Use(recover.New())
-	userController := v1.NewUserController(cfg)
+
+	userRepo := repository.NewUserRepository(db)
+
+	userService := service.NewUserService(cfg, userRepo)
+
+	userController := v1.NewUserController(cfg, userService)
 
 	registerHandlers(app, &api.HealthCheck{}, userController)
 
