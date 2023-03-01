@@ -16,7 +16,7 @@ func NewUserRepository(db *bun.DB) *userRepository {
 	}
 }
 
-func (r *userRepository) Save(user model.User) error {
+func (r *userRepository) Save(user *model.User) error {
 
 	_, err := r.db.NewInsert().Model(user).Exec(context.Background())
 	if err != nil {
@@ -24,4 +24,15 @@ func (r *userRepository) Save(user model.User) error {
 	}
 
 	return nil
+}
+
+func (r *userRepository) GetByID(userID string) (*model.User, error) {
+	user := &model.User{}
+
+	err := r.db.NewSelect().Model(user).Where("id = ?", userID).Scan(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }

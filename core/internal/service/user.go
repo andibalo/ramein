@@ -26,7 +26,6 @@ func NewUserService(cfg config.Config, userRepo repository.UserRepository) *user
 }
 
 func (s *userService) CreateUser(data *request.RegisterUserRequest) error {
-
 	user, err := s.mapCreateUserReqToUserModel(data)
 	if err != nil {
 		s.cfg.Logger().Error("[CreateUser] Failed to map payload to user model", zap.Error(err))
@@ -42,18 +41,18 @@ func (s *userService) CreateUser(data *request.RegisterUserRequest) error {
 	return nil
 }
 
-func (s *userService) mapCreateUserReqToUserModel(data *request.RegisterUserRequest) (model.User, error) {
+func (s *userService) mapCreateUserReqToUserModel(data *request.RegisterUserRequest) (*model.User, error) {
 
 	hasedPassword, err := util.HashPassword(data.Password)
 	if err != nil {
 		s.cfg.Logger().Error("[mapCreateUserReqToUserModel] Failed to hash password", zap.Error(err))
 
-		return model.User{}, fiber.NewError(http.StatusInternalServerError, "Failed to hash password")
+		return nil, fiber.NewError(http.StatusInternalServerError, "Failed to hash password")
 	}
 
-	id := "USER-" + uuid.NewString()
+	id := "USR-" + uuid.NewString()
 
-	return model.User{
+	return &model.User{
 		ID:              id,
 		Email:           data.Email,
 		FirstName:       data.FirstName,
