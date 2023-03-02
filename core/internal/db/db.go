@@ -25,6 +25,13 @@ func InitDB(cfg config.Config) *bun.DB {
 		))
 	}
 
+	err := pgdb.Ping()
+
+	if err != nil {
+		cfg.Logger().Error("Failed to connect to db")
+		panic("Failed to connect to db")
+	}
+
 	cfg.Logger().Info("Connected to database")
 
 	return pgdb

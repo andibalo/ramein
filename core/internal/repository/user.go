@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"github.com/andibalo/ramein/core/internal/model"
 	"github.com/uptrace/bun"
 )
@@ -18,10 +19,12 @@ func NewUserRepository(db *bun.DB) *userRepository {
 
 func (r *userRepository) Save(user *model.User) error {
 
-	_, err := r.db.NewInsert().Model(user).Exec(context.Background())
+	res, err := r.db.NewInsert().Model(user).Exec(context.Background())
 	if err != nil {
 		return err
 	}
+
+	fmt.Print(res)
 
 	return nil
 }

@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/andibalo/ramein/core/internal/config"
+	"github.com/andibalo/ramein/core/internal/constants"
 	"github.com/andibalo/ramein/core/internal/model"
 	"github.com/andibalo/ramein/core/internal/repository"
 	"github.com/andibalo/ramein/core/internal/request"
@@ -50,7 +51,7 @@ func (s *userService) mapCreateUserReqToUserModel(data *request.RegisterUserRequ
 		return nil, fiber.NewError(http.StatusInternalServerError, "Failed to hash password")
 	}
 
-	id := "USR-" + uuid.NewString()
+	id := constants.USER_ROLE_PREFIX + uuid.NewString()
 
 	return &model.User{
 		ID:              id,

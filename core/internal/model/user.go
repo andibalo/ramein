@@ -8,7 +8,7 @@ import (
 type User struct {
 	bun.BaseModel `bun:"table:users,alias:u"`
 
-	ID              string
+	ID              string `bun:",pk"`
 	Email           string
 	FirstName       string
 	LastName        string
@@ -19,14 +19,14 @@ type User struct {
 	IsVerified      bool
 	IsEmailVerified bool
 	ProfileSummary  *string
-	LastLogin       time.Time
+	LastLogin       time.Time    `bun:",nullzero,default:now()"`
 	UserImages      []*UserImage `bun:"rel:has-many,join:id=user_id"`
 	CreatedBy       string
-	CreatedAt       time.Time
+	CreatedAt       time.Time `bun:",nullzero,default:now()"`
 	UpdatedBy       *string
 	UpdatedAt       *time.Time
 	DeletedBy       *string
-	DeletedAt       time.Time `bun:",soft_delete"`
+	DeletedAt       time.Time `bun:",nullzero,soft_delete"`
 }
 
 type UserImage struct {
@@ -38,9 +38,9 @@ type UserImage struct {
 	ImageUrl  string
 	Order     int64
 	CreatedBy string
-	CreatedAt time.Time
+	CreatedAt time.Time `bun:",nullzero,default:now()"`
 	UpdatedBy *string
 	UpdatedAt *time.Time
 	DeletedBy *string
-	DeletedAt time.Time `bun:",soft_delete"`
+	DeletedAt time.Time `bun:",nullzero,soft_delete"`
 }
