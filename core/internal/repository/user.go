@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"github.com/andibalo/ramein/core/internal/model"
 	"github.com/uptrace/bun"
 )
@@ -19,20 +18,18 @@ func NewUserRepository(db *bun.DB) *userRepository {
 
 func (r *userRepository) Save(user *model.User) error {
 
-	res, err := r.db.NewInsert().Model(user).Exec(context.Background())
+	_, err := r.db.NewInsert().Model(user).Exec(context.Background())
 	if err != nil {
 		return err
 	}
 
-	fmt.Print(res)
-
 	return nil
 }
 
-func (r *userRepository) GetByID(userID string) (*model.User, error) {
+func (r *userRepository) GetByEmail(email string) (*model.User, error) {
 	user := &model.User{}
 
-	err := r.db.NewSelect().Model(user).Where("id = ?", userID).Scan(context.Background())
+	err := r.db.NewSelect().Model(user).Where("email = ?", email).Scan(context.Background())
 	if err != nil {
 		return nil, err
 	}

@@ -24,7 +24,7 @@ type User struct {
 	CreatedBy       string
 	CreatedAt       time.Time `bun:",nullzero,default:now()"`
 	UpdatedBy       *string
-	UpdatedAt       *time.Time
+	UpdatedAt       bun.NullTime
 	DeletedBy       *string
 	DeletedAt       time.Time `bun:",nullzero,soft_delete"`
 }
@@ -40,7 +40,7 @@ type UserImage struct {
 	CreatedBy string
 	CreatedAt time.Time `bun:",nullzero,default:now()"`
 	UpdatedBy *string
-	UpdatedAt *time.Time
+	UpdatedAt bun.NullTime
 	DeletedBy *string
 	DeletedAt time.Time `bun:",nullzero,soft_delete"`
 }

@@ -1,6 +1,8 @@
 package service
 
 import (
+	"database/sql"
+	"errors"
 	"github.com/andibalo/ramein/core/internal/config"
 	"github.com/andibalo/ramein/core/internal/constants"
 	"github.com/andibalo/ramein/core/internal/model"
@@ -27,6 +29,18 @@ func NewUserService(cfg config.Config, userRepo repository.UserRepository) *user
 }
 
 func (s *userService) CreateUser(data *request.RegisterUserRequest) error {
+
+	existingUser, err := s.userRepo.GetByEmail(data.Email)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		s.cfg.Logger().Error("[CreateUser] Failed to get user by email", zap.Error(err))
+		return err
+	}
+
+	if existingUser != nil {
+		s.cfg.Logger().Error("[CreateUser] User already exists")
+		return fiber.NewError(fiber.StatusBadRequest, "User already exists")
+	}
+
 	user, err := s.mapCreateUserReqToUserModel(data)
 	if err != nil {
 		s.cfg.Logger().Error("[CreateUser] Failed to map payload to user model", zap.Error(err))
