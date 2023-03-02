@@ -81,3 +81,31 @@ func (s *userService) mapCreateUserReqToUserModel(data *request.RegisterUserRequ
 		ProfileSummary:  data.ProfileSummary,
 	}, nil
 }
+
+func (s *userService) Login(data *request.LoginRequest) (string, error) {
+
+	existingUser, err := s.userRepo.GetByEmail(data.Email)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			s.cfg.Logger().Error("[Login] Invalid email/password", zap.Error(err))
+			return "", fiber.NewError(http.StatusBadRequest, "Invalid email/password")
+		}
+
+		s.cfg.Logger().Error("[Login] Failed to get user by email", zap.Error(err))
+		return "", err
+	}
+
+	isMatch := util.CheckPasswordHash(data.Password, existingUser.Password)
+	if !isMatch {
+		s.cfg.Logger().Error("[Login] Invalid password for user", zap.String("email", data.Email))
+		return "", fiber.NewError(http.StatusBadRequest, "Invalid email/password")
+	}
+
+	token, err := util.GenerateToken(existingUser)
+	if err != nil {
+		s.cfg.Logger().Error("[Login] Failed to generate JWT Token for user", zap.String("email", data.Email))
+		return "", fiber.NewError(http.StatusInternalServerError, "Failed to generate JWT Token")
+	}
+
+	return token, nil
+}

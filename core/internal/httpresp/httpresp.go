@@ -63,7 +63,7 @@ func HttpRespError(c *fiber.Ctx, err error) error {
 
 	l := logger.InitLogger()
 
-	l.Error("An Error Occured", zap.Any("Error :", e))
+	l.Error("An Error Occured", zap.Error(e))
 
 	c.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
 

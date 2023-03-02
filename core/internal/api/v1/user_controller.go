@@ -45,7 +45,7 @@ func (h *UserController) RegisterUser(c *fiber.Ctx) error {
 
 	err := h.userService.CreateUser(req)
 	if err != nil {
-		h.cfg.Logger().Error("[RegisterUser] Failed to parse request body", zap.Error(err))
+		h.cfg.Logger().Error("[RegisterUser] Failed to create user", zap.Error(err))
 		return httpresp.HttpRespError(c, err)
 	}
 
@@ -53,5 +53,18 @@ func (h *UserController) RegisterUser(c *fiber.Ctx) error {
 }
 
 func (h *UserController) Login(c *fiber.Ctx) error {
-	return c.SendString("Login User")
+	req := &request.LoginRequest{}
+
+	if err := c.BodyParser(req); err != nil {
+		h.cfg.Logger().Error("[Login] Failed to parse request body", zap.Error(err))
+		return httpresp.HttpRespError(c, fiber.NewError(http.StatusBadRequest, "Failed to parse request body"))
+	}
+
+	jwt, err := h.userService.Login(req)
+	if err != nil {
+		h.cfg.Logger().Error("[Login] Failed to login user", zap.Error(err))
+		return httpresp.HttpRespError(c, err)
+	}
+
+	return httpresp.HttpRespSuccess(c, jwt, nil)
 }

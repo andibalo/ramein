@@ -10,3 +10,8 @@ type RegisterUserRequest struct {
 	ProfileSummary *string  `json:"profile_summary"`
 	Images         []string `json:"images"`
 }
+
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
