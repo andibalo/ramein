@@ -4,6 +4,8 @@ go 1.19
 
 require (
 	github.com/gofiber/fiber/v2 v2.42.0
+	github.com/golang-jwt/jwt/v4 v4.5.0
+	github.com/google/uuid v1.3.0
 	github.com/lib/pq v1.10.7
 	github.com/spf13/viper v1.15.0
 	github.com/uptrace/bun v1.1.11
@@ -11,6 +13,7 @@ require (
 	github.com/uptrace/bun/driver/pgdriver v1.1.11
 	github.com/uptrace/bun/extra/bundebug v1.1.11
 	go.uber.org/zap v1.24.0
+	golang.org/x/crypto v0.5.0
 )
 
 require (
@@ -18,8 +21,6 @@ require (
 	github.com/fatih/color v1.14.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/gofiber/jwt/v3 v3.3.6 // indirect
-	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/klauspost/compress v1.16.0 // indirect
@@ -47,7 +48,6 @@ require (
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
-	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.6.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect

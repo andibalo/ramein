@@ -1,4 +1,4 @@
-package pubsub
+package rabbitmq
 
 //TODO : rabbit mq middleware
 // FactoryMiddleware is factory function to return
