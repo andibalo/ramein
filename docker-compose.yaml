@@ -13,20 +13,23 @@ services:
     networks:
       - rabbitmq_net
 
-#  postgres:
-#    build:
-#      context: ./../auth-app
-#      dockerfile: Dockerfile
-#    restart: always
-#    deploy:
-#      mode: replicated
-#      replicas: 1
-#    volumes:
-#      - ./../auth-app/data:/app/auth-app/data
-#    ports:
-#      - "5000:5000"
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /data/postgres
+    volumes:
+      - postgres-db:/data/postgres
+    ports:
+      - "5432:5432"
 
 
 networks:
   rabbitmq_net:
     driver: bridge
+
+volumes:
+  postgres-db:
+    driver: local

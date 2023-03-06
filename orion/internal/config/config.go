@@ -22,12 +22,16 @@ type Config interface {
 	AppAddress() string
 
 	DBConnString() string
+
+	RabbitMQURL() string
+	RabbitMQChannel() string
 }
 
 type AppConfig struct {
 	logger *zap.Logger
 	App    app
 	Db     db
+	Rmq    rmq
 }
 
 type app struct {
@@ -37,6 +41,12 @@ type app struct {
 	Description string
 	AppUrl      string
 	AppID       string
+	RabbitMQURL string
+}
+
+type rmq struct {
+	Channel string
+	URL     string
 }
 
 type db struct {
@@ -79,6 +89,10 @@ func InitConfig() *AppConfig {
 			Name:     viper.GetString("DB_NAME"),
 			MaxPool:  viper.GetInt("DB_MAX_POOLING_CONNECTION"),
 		},
+		Rmq: rmq{
+			Channel: viper.GetString("RABBITMQ_CHANNEL"),
+			URL:     viper.GetString("RABBITMQ_URL"),
+		},
 	}
 }
 
@@ -108,4 +122,12 @@ func (c *AppConfig) AppAddress() string {
 
 func (c *AppConfig) DBConnString() string {
 	return c.StorageConfig().DSN
+}
+
+func (c *AppConfig) RabbitMQURL() string {
+	return c.Rmq.URL
+}
+
+func (c *AppConfig) RabbitMQChannel() string {
+	return c.Rmq.Channel
 }
