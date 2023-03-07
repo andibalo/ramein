@@ -19,7 +19,7 @@ func (Template) Fields() []ent.Field {
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New).
 			StorageKey("oid"),
-		field.String("name"),
+		field.String("name").Unique(),
 		field.String("type"),
 		field.String("template").
 			SchemaType(map[string]string{
@@ -28,10 +28,18 @@ func (Template) Fields() []ent.Field {
 		field.String("created_by"),
 		field.Time("created_at").
 			Default(time.Now),
-		field.String("updated_by").Nillable(),
-		field.Time("updated_at").Nillable(),
-		field.String("deleted_by").Nillable(),
-		field.Time("created_at").Nillable(),
+		field.String("updated_by").
+			Optional().
+			Nillable(),
+		field.Time("updated_at").
+			Optional().
+			Nillable(),
+		field.String("deleted_by").
+			Optional().
+			Nillable(),
+		field.Time("deleted_at").
+			Optional().
+			Nillable(),
 	}
 }
 

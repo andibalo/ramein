@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"entgo.io/ent/entc/integration/ent"
 	"github.com/andibalo/ramein/orion/internal/config"
 	_ "github.com/lib/pq"
@@ -19,9 +20,10 @@ func InitDB(cfg config.Config) *ent.Client {
 
 	cfg.Logger().Info("Connected to database")
 
-	//if err := client.Schema.Create(context.Background()); err != nil {
-	//	log.Fatalf("failed creating schema resources: %v", err)
-	//}
+	if err := client.Schema.Create(context.Background()); err != nil {
+		cfg.Logger().Error("failed creating schema resources", zap.Error(err))
+		panic("failed creating schema resources")
+	}
 
 	return client
 }
