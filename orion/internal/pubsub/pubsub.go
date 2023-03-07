@@ -1,9 +1,9 @@
 package pubsub
 
 import (
-	"context"
 	"github.com/andibalo/ramein/commons/rabbitmq"
 	"github.com/andibalo/ramein/orion/internal/config"
+	"go.uber.org/zap"
 )
 
 type PubSub interface {
@@ -24,14 +24,14 @@ func NewPubSub(cfg config.Config, rmq rabbitmq.PubSubService) *pubsub {
 
 func (p *pubsub) InitSubscribers() {
 
-	_ = p.Rmq.Subscribe(rabbitmq.SubscriberConfig{
+	err := p.Rmq.Subscribe(rabbitmq.SubscriberConfig{
 		Topic:   CORE_NEW_USER_REGISTERED,
 		Channel: p.Config.RabbitMQChannel(),
 	}, p.CoreNewUserRegisteredHandler)
-}
 
-func (p *pubsub) CoreNewUserRegisteredHandler(c context.Context, message rabbitmq.Message) error {
-	p.LogPayload(CORE_NEW_USER_REGISTERED, message)
+	if err != nil {
+		p.Config.Logger().Error("Error subscribing to topic", zap.String("topic", CORE_NEW_USER_REGISTERED))
+	}
 
-	return nil
+	p.Config.Logger().Info("Success subscribing to topic", zap.String("topic", CORE_NEW_USER_REGISTERED))
 }
