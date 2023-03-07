@@ -17,8 +17,7 @@ type Template struct {
 func (Template) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New).
-			StorageKey("oid"),
+			Default(uuid.New),
 		field.String("name").Unique(),
 		field.String("type"),
 		field.String("template").

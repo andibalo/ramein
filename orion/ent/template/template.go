@@ -12,7 +12,7 @@ const (
 	// Label holds the string label denoting the template type in the database.
 	Label = "template"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "oid"
+	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldType holds the string denoting the type field in the database.

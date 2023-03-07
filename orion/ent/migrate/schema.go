@@ -10,7 +10,7 @@ import (
 var (
 	// TemplatesColumns holds the columns for the "templates" table.
 	TemplatesColumns = []*schema.Column{
-		{Name: "oid", Type: field.TypeUUID},
+		{Name: "id", Type: field.TypeUUID},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "type", Type: field.TypeString},
 		{Name: "template", Type: field.TypeString, SchemaType: map[string]string{"postgres": "text"}},
