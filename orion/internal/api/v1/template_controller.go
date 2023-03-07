@@ -47,7 +47,7 @@ func (h *TemplateController) CreateTemplate(c *gin.Context) {
 	err := h.templateService.CreateTemplate(data)
 
 	if err != nil {
-		h.cfg.Logger().Error("Error creating template", zap.Error(err))
+		h.cfg.Logger().Error("[CreateTemplate] Error creating template", zap.Error(err))
 		httpresp.HttpRespError(c, err)
 		return
 	}
@@ -57,4 +57,13 @@ func (h *TemplateController) CreateTemplate(c *gin.Context) {
 
 func (h *TemplateController) GetTemplateByID(c *gin.Context) {
 
+	template, err := h.templateService.GetTemplateByID(c.Param("id"))
+
+	if err != nil {
+		h.cfg.Logger().Error("[CreateTemplate] Error creating template", zap.Error(err))
+		httpresp.HttpRespError(c, err)
+		return
+	}
+
+	httpresp.HttpRespSuccess(c, template, nil)
 }

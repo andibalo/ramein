@@ -3,7 +3,10 @@ package repository
 import (
 	"context"
 	"github.com/andibalo/ramein/orion/ent"
+	"github.com/andibalo/ramein/orion/ent/template"
+	"github.com/andibalo/ramein/orion/internal/apperr"
 	"github.com/andibalo/ramein/orion/internal/request"
+	"github.com/google/uuid"
 )
 
 type templateRepository struct {
@@ -32,4 +35,23 @@ func (r *templateRepository) Save(data request.CreateTemplateReq) error {
 	}
 
 	return nil
+}
+
+func (r *templateRepository) GetByID(templateID string) (*ent.Template, error) {
+	uid, _ := uuid.Parse(templateID)
+
+	t, err := r.db.Template.
+		Query().
+		Where(template.ID(uid)).
+		Only(context.Background())
+
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, apperr.ErrNotFound
+		}
+
+		return nil, err
+	}
+
+	return t, nil
 }
