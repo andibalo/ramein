@@ -22,6 +22,8 @@ func main() {
 
 	database := db.InitDB(cfg)
 
+	defer database.Close()
+
 	server := orion.NewServer(cfg, database)
 
 	err = server.Start(cfg.AppAddress())

@@ -24,6 +24,7 @@ func (r *templateRepository) Save(data request.CreateTemplateReq) error {
 		SetName(data.Name).
 		SetType(data.Type).
 		SetTemplate(data.Template).
+		SetCreatedBy("test"). //TODO: Remove later
 		Save(context.Background())
 
 	if err != nil {

@@ -17,7 +17,6 @@ func InitDB(cfg config.Config) *ent.Client {
 		cfg.Logger().Error("Failed to connect to db", zap.Error(err))
 		panic("Failed to connect to db")
 	}
-	defer client.Close()
 
 	cfg.Logger().Info("Connected to database")
 
