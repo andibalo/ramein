@@ -1,8 +1,8 @@
 package orion
 
 import (
-	"entgo.io/ent/entc/integration/ent"
 	"github.com/andibalo/ramein/commons/rabbitmq"
+	"github.com/andibalo/ramein/orion/ent"
 	"github.com/andibalo/ramein/orion/internal/api"
 	v1 "github.com/andibalo/ramein/orion/internal/api/v1"
 	"github.com/andibalo/ramein/orion/internal/config"
@@ -31,7 +31,7 @@ func NewServer(cfg config.Config, db *ent.Client) *Server {
 
 	templateRepo := repository.NewTemplateRepository(db)
 
-	templateService := service.NewTemplateService(templateRepo)
+	templateService := service.NewTemplateService(cfg, templateRepo)
 
 	templateController := v1.NewTemplateController(cfg, templateService)
 

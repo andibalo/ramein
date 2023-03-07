@@ -2,7 +2,8 @@ package db
 
 import (
 	"context"
-	"entgo.io/ent/entc/integration/ent"
+	"github.com/andibalo/ramein/orion/ent"
+
 	"github.com/andibalo/ramein/orion/internal/config"
 	_ "github.com/lib/pq"
 	"go.uber.org/zap"
