@@ -90,6 +90,9 @@ func MapErrorsToCode(err error) response.Code {
 	case errors.Is(err, ErrUnauthorized):
 		return response.Unauthorized
 
+	case errors.Is(err, ErrNotFound):
+		return response.NotFound
+
 	case errors.Is(err, ErrTimeout):
 		return response.GatewayTimeout
 
@@ -105,6 +108,9 @@ func MapErrorsToStatusCode(err error) int {
 	switch {
 	case errors.Is(err, ErrUnauthorized):
 		return http.StatusUnauthorized
+
+	case errors.Is(err, ErrNotFound):
+		return http.StatusNotFound
 
 	case errors.Is(err, ErrTimeout):
 		return http.StatusGatewayTimeout
