@@ -1,6 +1,7 @@
 BEGIN;
 
-drop table if exists user;
-drop table if exists user_image;
+drop table if exists users;
+drop table if exists user_images;
+drop table if exists user_verify_emails;
 
 COMMIT;
