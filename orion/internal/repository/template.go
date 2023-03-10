@@ -37,6 +37,24 @@ func (r *templateRepository) Save(data request.CreateTemplateReq) error {
 	return nil
 }
 
+func (r *templateRepository) GetByTemplateName(templateName string) (*ent.Template, error) {
+
+	t, err := r.db.Template.
+		Query().
+		Where(template.Name(templateName)).
+		Only(context.Background())
+
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, apperr.ErrNotFound
+		}
+
+		return nil, err
+	}
+
+	return t, nil
+}
+
 func (r *templateRepository) GetByID(templateID string) (*ent.Template, error) {
 	uid, _ := uuid.Parse(templateID)
 

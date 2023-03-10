@@ -20,20 +20,20 @@ func NewServer(cfg config.Config, db *ent.Client) *Server {
 
 	router := gin.Default()
 
-	rmq := rabbitmq.NewRabitmq(rabbitmq.RabitmqConfiguration{
-		URL:    cfg.RabbitMQURL(),
-		Enable: true,
-	})
-
-	pb := pubsub.NewPubSub(cfg, rmq)
-
-	pb.InitSubscribers()
-
 	templateRepo := repository.NewTemplateRepository(db)
 
 	templateService := service.NewTemplateService(cfg, templateRepo)
 
 	templateController := v1.NewTemplateController(cfg, templateService)
+
+	rmq := rabbitmq.NewRabitmq(rabbitmq.RabitmqConfiguration{
+		URL:    cfg.RabbitMQURL(),
+		Enable: true,
+	})
+
+	pb := pubsub.NewPubSub(cfg, rmq, templateRepo)
+
+	pb.InitSubscribers()
 
 	registerHandlers(router, &api.HealthCheck{}, templateController)
 
