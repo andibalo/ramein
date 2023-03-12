@@ -6,6 +6,7 @@ import (
 	"github.com/andibalo/ramein/core/internal/config"
 	"github.com/andibalo/ramein/core/internal/constants"
 	"github.com/andibalo/ramein/core/internal/model"
+	"github.com/andibalo/ramein/core/internal/pubsub"
 	"github.com/andibalo/ramein/core/internal/repository"
 	"github.com/andibalo/ramein/core/internal/request"
 	"github.com/andibalo/ramein/core/internal/util"
@@ -18,13 +19,15 @@ import (
 type userService struct {
 	cfg      config.Config
 	userRepo repository.UserRepository
+	pb       pubsub.PubSub
 }
 
-func NewUserService(cfg config.Config, userRepo repository.UserRepository) *userService {
+func NewUserService(cfg config.Config, userRepo repository.UserRepository, pb pubsub.PubSub) *userService {
 
 	return &userService{
 		cfg:      cfg,
 		userRepo: userRepo,
+		pb:       pb,
 	}
 }
 

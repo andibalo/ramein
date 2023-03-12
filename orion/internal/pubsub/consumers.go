@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	pubsubCommons "github.com/andibalo/ramein/commons/pubsub"
 	"github.com/andibalo/ramein/commons/rabbitmq"
 	"github.com/andibalo/ramein/orion/internal/constants"
 	"github.com/andibalo/ramein/orion/internal/service/external"
@@ -16,7 +17,7 @@ func (p *pubsub) CoreNewUserRegisteredHandler(c context.Context, message rabbitm
 
 	payload := message.Payload
 
-	var data CoreNewRegisteredUserPayload
+	var data pubsubCommons.CoreNewRegisteredUserPayload
 
 	jsonData, err := json.Marshal(payload)
 	if err != nil {

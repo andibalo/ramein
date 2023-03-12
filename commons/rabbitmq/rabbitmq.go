@@ -409,6 +409,8 @@ func (ss *rabitmqSvc) PublishWithContext(ctx context.Context, topic string, msg 
 	// Generate middleware from factory function
 	// and execute publisher middleware
 	//ss.config.Middleware(ss.ctx, topic).MiddlewarePublisher(ctx, msg, next)
+
+	err = ss.publishWithContext(ctx, topic, msg)
 	return err
 }
 

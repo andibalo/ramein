@@ -1,10 +1,12 @@
 package core
 
 import (
+	"github.com/andibalo/ramein/commons/rabbitmq"
 	"github.com/andibalo/ramein/core/internal/api"
 	v1 "github.com/andibalo/ramein/core/internal/api/v1"
 	"github.com/andibalo/ramein/core/internal/config"
 	"github.com/andibalo/ramein/core/internal/httpresp"
+	"github.com/andibalo/ramein/core/internal/pubsub"
 	"github.com/andibalo/ramein/core/internal/repository"
 	"github.com/andibalo/ramein/core/internal/service"
 	"github.com/gofiber/fiber/v2"
@@ -23,9 +25,16 @@ func NewServer(cfg config.Config, db *bun.DB) *fiber.App {
 
 	app.Use(recover.New())
 
+	rmq := rabbitmq.NewRabitmq(rabbitmq.RabitmqConfiguration{
+		URL:    cfg.RabbitMQURL(),
+		Enable: true,
+	})
+
+	pb := pubsub.NewPubSub(cfg, rmq)
+
 	userRepo := repository.NewUserRepository(db)
 
-	userService := service.NewUserService(cfg, userRepo)
+	userService := service.NewUserService(cfg, userRepo, pb)
 
 	userController := v1.NewUserController(cfg, userService)
 
