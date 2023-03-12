@@ -9,6 +9,7 @@ import (
 	"github.com/andibalo/ramein/orion/internal/pubsub"
 	"github.com/andibalo/ramein/orion/internal/repository"
 	"github.com/andibalo/ramein/orion/internal/service"
+	"github.com/andibalo/ramein/orion/internal/service/external"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,7 +32,9 @@ func NewServer(cfg config.Config, db *ent.Client) *Server {
 		Enable: true,
 	})
 
-	pb := pubsub.NewPubSub(cfg, rmq, templateRepo)
+	sib := external.NewSendInBlueService(cfg)
+
+	pb := pubsub.NewPubSub(cfg, rmq, templateRepo, sib)
 
 	pb.InitSubscribers()
 

@@ -4,6 +4,7 @@ import (
 	"github.com/andibalo/ramein/commons/rabbitmq"
 	"github.com/andibalo/ramein/orion/internal/config"
 	"github.com/andibalo/ramein/orion/internal/repository"
+	"github.com/andibalo/ramein/orion/internal/service/external"
 	"go.uber.org/zap"
 )
 
@@ -14,14 +15,16 @@ type pubsub struct {
 	Config       config.Config
 	Rmq          rabbitmq.PubSubService
 	templateRepo repository.TemplateRepository
+	mailer       external.Mailer
 }
 
-func NewPubSub(cfg config.Config, rmq rabbitmq.PubSubService, templateRepo repository.TemplateRepository) *pubsub {
+func NewPubSub(cfg config.Config, rmq rabbitmq.PubSubService, templateRepo repository.TemplateRepository, mailer external.Mailer) *pubsub {
 
 	return &pubsub{
 		Config:       cfg,
 		Rmq:          rmq,
 		templateRepo: templateRepo,
+		mailer:       mailer,
 	}
 }
 

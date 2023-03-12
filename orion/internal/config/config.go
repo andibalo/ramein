@@ -21,27 +21,39 @@ type Config interface {
 	AppEnv() string
 	AppAddress() string
 
+	DefaultSenderName() string
+	DefaultSenderEmail() string
+
 	DBConnString() string
 
 	RabbitMQURL() string
 	RabbitMQChannel() string
+
+	SendInBlueApiKey() string
 }
 
 type AppConfig struct {
-	logger *zap.Logger
-	App    app
-	Db     db
-	Rmq    rmq
+	logger     *zap.Logger
+	App        app
+	Db         db
+	Rmq        rmq
+	SendInBlue sendInBlue
 }
 
 type app struct {
-	AppEnv      string
-	AppVersion  string
-	Name        string
-	Description string
-	AppUrl      string
-	AppID       string
-	RabbitMQURL string
+	AppEnv             string
+	AppVersion         string
+	Name               string
+	Description        string
+	AppUrl             string
+	AppID              string
+	RabbitMQURL        string
+	DefaultSenderEmail string
+	DefaultSenderName  string
+}
+
+type sendInBlue struct {
+	ApiKey string
 }
 
 type rmq struct {
@@ -73,12 +85,14 @@ func InitConfig() *AppConfig {
 	return &AppConfig{
 		logger: l,
 		App: app{
-			AppEnv:      viper.GetString("APP_ENV"),
-			AppVersion:  viper.GetString("APP_VERSION"),
-			Name:        "corvus",
-			Description: "noitfication service",
-			AppUrl:      viper.GetString("APP_URL"),
-			AppID:       viper.GetString("APP_ID"),
+			AppEnv:             viper.GetString("APP_ENV"),
+			AppVersion:         viper.GetString("APP_VERSION"),
+			Name:               "corvus",
+			Description:        "noitfication service",
+			AppUrl:             viper.GetString("APP_URL"),
+			AppID:              viper.GetString("APP_ID"),
+			DefaultSenderEmail: "admin@ramein.com",
+			DefaultSenderName:  "Ramein",
 		},
 		Db: db{
 			DSN:      getRequiredString("DB_DSN"),
@@ -92,6 +106,9 @@ func InitConfig() *AppConfig {
 		Rmq: rmq{
 			Channel: viper.GetString("RABBITMQ_CHANNEL"),
 			URL:     viper.GetString("RABBITMQ_URL"),
+		},
+		SendInBlue: sendInBlue{
+			ApiKey: viper.GetString("SENDINBLUE_API_KEY"),
 		},
 	}
 }
@@ -130,4 +147,16 @@ func (c *AppConfig) RabbitMQURL() string {
 
 func (c *AppConfig) RabbitMQChannel() string {
 	return c.Rmq.Channel
+}
+
+func (c *AppConfig) SendInBlueApiKey() string {
+	return c.SendInBlue.ApiKey
+}
+
+func (c *AppConfig) DefaultSenderEmail() string {
+	return c.App.DefaultSenderEmail
+}
+
+func (c *AppConfig) DefaultSenderName() string {
+	return c.App.DefaultSenderName
 }

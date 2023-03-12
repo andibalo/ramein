@@ -3,6 +3,7 @@ package httpresp
 import (
 	"fmt"
 	"github.com/andibalo/ramein/orion/internal/apperr"
+	"github.com/andibalo/ramein/orion/internal/response"
 	"net/http"
 	"reflect"
 	"time"
@@ -11,12 +12,13 @@ import (
 )
 
 type Meta struct {
-	Path       string `json:"path"`
-	StatusCode int    `json:"statusCode"`
-	Status     string `json:"status"`
-	Message    string `json:"message"`
-	Error      string `json:"error,omitempty" swaggerignore:"true"`
-	Timestamp  string `json:"timestamp"`
+	Path       string        `json:"path"`
+	Code       response.Code `json:"code"`
+	StatusCode int           `json:"statusCode"`
+	Status     string        `json:"status"`
+	Message    string        `json:"message"`
+	Error      string        `json:"error,omitempty" swaggerignore:"true"`
+	Timestamp  string        `json:"timestamp"`
 }
 
 type Response struct {
@@ -43,10 +45,12 @@ type HTTPErrResp struct {
 func HttpRespError(c *gin.Context, err error) {
 
 	statusCode := apperr.MapErrorsToStatusCode(err)
+	respCode := apperr.MapErrorsToCode(err)
 
 	jsonErrResp := &HTTPErrResp{
 		Meta: Meta{
 			Path:       c.Request.URL.Path,
+			Code:       respCode,
 			StatusCode: statusCode,
 			Status:     http.StatusText(statusCode),
 			Message:    fmt.Sprintf("%s %s [%d] %s", c.Request.Method, c.Request.RequestURI, statusCode, http.StatusText(statusCode)),

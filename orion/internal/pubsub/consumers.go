@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"github.com/andibalo/ramein/commons/rabbitmq"
 	"github.com/andibalo/ramein/orion/internal/constants"
+	"github.com/andibalo/ramein/orion/internal/service/external"
 	"go.uber.org/zap"
 	"html/template"
 )
@@ -47,6 +48,19 @@ func (p *pubsub) CoreNewUserRegisteredHandler(c context.Context, message rabbitm
 	emailBody := buf.String()
 
 	p.Config.Logger().Info("Email", zap.String("email", emailBody))
+
+	sendEmailReq := external.SendEmailReq{
+		Subject:        "Welcome to Ramein!",
+		RecipientName:  data.Email,
+		RecipientEmail: data.FirstName + " " + data.LastName,
+		HtmlContent:    emailBody,
+	}
+
+	err = p.mailer.SendEmail(sendEmailReq)
+	if err != nil {
+		p.Config.Logger().Error("[CoreNewUserRegisteredHandler] Failed to send email", zap.Error(err))
+		return err
+	}
 
 	return nil
 }
