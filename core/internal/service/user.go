@@ -12,22 +12,26 @@ import (
 	"github.com/andibalo/ramein/core/internal/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"github.com/uptrace/bun"
 	"go.uber.org/zap"
 	"net/http"
+	"time"
 )
 
 type userService struct {
 	cfg      config.Config
 	userRepo repository.UserRepository
 	pb       pubsub.PubSub
+	db       *bun.DB
 }
 
-func NewUserService(cfg config.Config, userRepo repository.UserRepository, pb pubsub.PubSub) *userService {
+func NewUserService(cfg config.Config, userRepo repository.UserRepository, pb pubsub.PubSub, db *bun.DB) *userService {
 
 	return &userService{
 		cfg:      cfg,
 		userRepo: userRepo,
 		pb:       pb,
+		db:       db,
 	}
 }
 
@@ -50,10 +54,42 @@ func (s *userService) CreateUser(data *request.RegisterUserRequest) error {
 		return err
 	}
 
-	err = s.userRepo.Save(user)
+	tx, err := s.db.Begin()
+	if err != nil {
+		s.cfg.Logger().Error("[CreateUser] Failed to begin transaction", zap.Error(err))
+		return err
+	}
+
+	err = s.userRepo.SaveTx(user, tx)
 	if err != nil {
 		s.cfg.Logger().Error("[CreateUser] Failed to insert user to database", zap.Error(err))
+		tx.Rollback()
+
 		return fiber.NewError(http.StatusInternalServerError, "Failed to insert user to database")
+	}
+
+	userVerifyEmail := &model.UserVerifyEmail{
+		ID:         uuid.NewString(),
+		UserID:     user.ID,
+		SecretCode: util.GenRandomString(10),
+		Email:      user.Email,
+		IsUsed:     false,
+		ExpiredAt:  time.Now().Add(time.Minute * time.Duration(s.cfg.UserSecretCodeExpiryMins())),
+		CreatedBy:  config.AppName,
+	}
+
+	err = s.userRepo.SaveUserVerifyEmailTx(userVerifyEmail, tx)
+	if err != nil {
+		s.cfg.Logger().Error("[CreateUser] Failed to insert user verify email to database", zap.Error(err))
+		tx.Rollback()
+
+		return fiber.NewError(http.StatusInternalServerError, "Failed to insert user verify email to database")
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		s.cfg.Logger().Error("[CreateUser] Failed to commit transaction", zap.Error(err))
+		return err
 	}
 
 	return nil

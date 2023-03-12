@@ -8,6 +8,7 @@ import (
 )
 
 const (
+	AppName            = "CORE_SERVICE"
 	AppAddress         = ":8000"
 	EnvDevEnvironment  = "DEV"
 	EnvProdEnvironment = "PROD"
@@ -24,6 +25,8 @@ type Config interface {
 
 	RabbitMQURL() string
 	RabbitMQChannel() string
+
+	UserSecretCodeExpiryMins() int
 }
 
 type AppConfig struct {
@@ -34,12 +37,13 @@ type AppConfig struct {
 }
 
 type app struct {
-	AppEnv      string
-	AppVersion  string
-	Name        string
-	Description string
-	AppUrl      string
-	AppID       string
+	AppEnv                   string
+	AppVersion               string
+	Name                     string
+	Description              string
+	AppUrl                   string
+	AppID                    string
+	UserSecretCodeExpiryMins int
 }
 
 type db struct {
@@ -71,12 +75,13 @@ func InitConfig() *AppConfig {
 	return &AppConfig{
 		logger: l,
 		App: app{
-			AppEnv:      viper.GetString("APP_ENV"),
-			AppVersion:  viper.GetString("APP_VERSION"),
-			Name:        "core",
-			Description: "Stores and maintains user information",
-			AppUrl:      viper.GetString("APP_URL"),
-			AppID:       viper.GetString("APP_ID"),
+			AppEnv:                   viper.GetString("APP_ENV"),
+			AppVersion:               viper.GetString("APP_VERSION"),
+			Name:                     "core",
+			Description:              "Stores and maintains user information",
+			AppUrl:                   viper.GetString("APP_URL"),
+			AppID:                    viper.GetString("APP_ID"),
+			UserSecretCodeExpiryMins: viper.GetInt("USER_SECRET_CODE_EXPIRY_MINS"),
 		},
 		Db: db{
 			DSN:      getRequiredString("DB_DSN"),
@@ -120,4 +125,8 @@ func (c *AppConfig) AppAddress() string {
 
 func (c *AppConfig) DBConnString() string {
 	return c.StorageConfig().DSN
+}
+
+func (c *AppConfig) UserSecretCodeExpiryMins() int {
+	return c.App.UserSecretCodeExpiryMins
 }

@@ -34,7 +34,7 @@ func NewServer(cfg config.Config, db *bun.DB) *fiber.App {
 
 	userRepo := repository.NewUserRepository(db)
 
-	userService := service.NewUserService(cfg, userRepo, pb)
+	userService := service.NewUserService(cfg, userRepo, pb, db)
 
 	userController := v1.NewUserController(cfg, userService)
 

@@ -16,6 +16,16 @@ func NewUserRepository(db *bun.DB) *userRepository {
 	}
 }
 
+func (r *userRepository) SaveTx(user *model.User, tx bun.Tx) error {
+
+	_, err := tx.NewInsert().Model(user).Exec(context.Background())
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *userRepository) Save(user *model.User) error {
 
 	_, err := r.db.NewInsert().Model(user).Exec(context.Background())
@@ -35,4 +45,14 @@ func (r *userRepository) GetByEmail(email string) (*model.User, error) {
 	}
 
 	return user, nil
+}
+
+func (r *userRepository) SaveUserVerifyEmailTx(userVerifyEmail *model.UserVerifyEmail, tx bun.Tx) error {
+
+	_, err := tx.NewInsert().Model(userVerifyEmail).Exec(context.Background())
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

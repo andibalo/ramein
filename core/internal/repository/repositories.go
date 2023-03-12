@@ -1,8 +1,13 @@
 package repository
 
-import "github.com/andibalo/ramein/core/internal/model"
+import (
+	"github.com/andibalo/ramein/core/internal/model"
+	"github.com/uptrace/bun"
+)
 
 type UserRepository interface {
 	Save(user *model.User) error
+	SaveTx(user *model.User, tx bun.Tx) error
 	GetByEmail(email string) (*model.User, error)
+	SaveUserVerifyEmailTx(userVerifyEmail *model.UserVerifyEmail, tx bun.Tx) error
 }
