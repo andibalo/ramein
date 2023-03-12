@@ -11,10 +11,6 @@ import (
 	"net/http"
 )
 
-const (
-	userBasePath = "/user"
-)
-
 type UserController struct {
 	cfg         config.Config
 	userService service.UserService
@@ -29,10 +25,11 @@ func NewUserController(cfg config.Config, userService service.UserService) *User
 }
 
 func (h *UserController) AddRoutes(f *fiber.App) {
-	r := f.Group(constants.V1BasePath + userBasePath)
+	r := f.Group(constants.UserBasePathV1)
 
-	r.Post("/register", h.RegisterUser)
-	r.Post("/login", h.Login)
+	r.Post(constants.UserRegisterPath, h.RegisterUser)
+	r.Post(constants.UserLoginPath, h.Login)
+	r.Get(constants.UserVerifyEmailPath, h.VerifyEmail)
 }
 
 func (h *UserController) RegisterUser(c *fiber.Ctx) error {
@@ -67,4 +64,23 @@ func (h *UserController) Login(c *fiber.Ctx) error {
 	}
 
 	return httpresp.HttpRespSuccess(c, jwt, nil)
+}
+
+func (h *UserController) VerifyEmail(c *fiber.Ctx) error {
+	secretCode := c.Query("secret_code")
+	userVerifyId := c.Query("id")
+
+	if secretCode == "" || userVerifyId == "" {
+		h.cfg.Logger().Error("[VerifyEmail] Secret code and user verify id query param must exist")
+		return httpresp.HttpRespError(c, fiber.NewError(http.StatusBadRequest, "Invalid verify email link"))
+	}
+	//
+	//jwt, err := h.userService.Login(req)
+	//if err != nil {
+	//	h.cfg.Logger().Error("[Login] Failed to login user", zap.Error(err))
+	//	return httpresp.HttpRespError(c, err)
+	//}
+
+	//return httpresp.HttpRespSuccess(c, jwt, nil)
+	return nil
 }

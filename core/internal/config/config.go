@@ -19,6 +19,7 @@ type Config interface {
 	StorageConfig() db
 
 	AppEnv() string
+	AppURL() string
 	AppAddress() string
 
 	DBConnString() string
@@ -117,6 +118,10 @@ func (c *AppConfig) StorageConfig() db {
 
 func (c *AppConfig) AppEnv() string {
 	return c.App.AppEnv
+}
+
+func (c *AppConfig) AppURL() string {
+	return c.App.AppUrl + AppAddress
 }
 
 func (c *AppConfig) AppAddress() string {

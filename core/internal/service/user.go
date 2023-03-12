@@ -3,6 +3,8 @@ package service
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+	pubsubCommons "github.com/andibalo/ramein/commons/pubsub"
 	"github.com/andibalo/ramein/core/internal/config"
 	"github.com/andibalo/ramein/core/internal/constants"
 	"github.com/andibalo/ramein/core/internal/model"
@@ -91,6 +93,19 @@ func (s *userService) CreateUser(data *request.RegisterUserRequest) error {
 		s.cfg.Logger().Error("[CreateUser] Failed to commit transaction", zap.Error(err))
 		return err
 	}
+
+	verifyUrl := s.cfg.AppURL() + constants.UserVerifyEmailPath + fmt.Sprintf("?secret_code=%s&id=%s", userVerifyEmail.SecretCode, userVerifyEmail.ID)
+
+	msg := pubsubCommons.CoreNewRegisteredUserPayload{
+		FirstName: data.FirstName,
+		LastName:  data.LastName,
+		Email:     data.Email,
+		VerifyURL: verifyUrl,
+	}
+
+	go func() {
+		s.pb.PublishNewUserRegistered(msg)
+	}()
 
 	return nil
 }
