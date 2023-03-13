@@ -74,13 +74,12 @@ func (h *UserController) VerifyEmail(c *fiber.Ctx) error {
 		h.cfg.Logger().Error("[VerifyEmail] Secret code and user verify id query param must exist")
 		return httpresp.HttpRespError(c, fiber.NewError(http.StatusBadRequest, "Invalid verify email link"))
 	}
-	//
-	//jwt, err := h.userService.Login(req)
-	//if err != nil {
-	//	h.cfg.Logger().Error("[Login] Failed to login user", zap.Error(err))
-	//	return httpresp.HttpRespError(c, err)
-	//}
 
-	//return httpresp.HttpRespSuccess(c, jwt, nil)
-	return nil
+	err := h.userService.VerifyEmail(secretCode, userVerifyId)
+	if err != nil {
+		h.cfg.Logger().Error("[VerifyEmail] Failed to verify user email", zap.Error(err))
+		return httpresp.HttpRespError(c, err)
+	}
+
+	return httpresp.HttpRespSuccess(c, nil, nil)
 }

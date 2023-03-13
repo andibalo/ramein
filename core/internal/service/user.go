@@ -42,7 +42,7 @@ func (s *userService) CreateUser(data *request.RegisterUserRequest) error {
 	existingUser, err := s.userRepo.GetByEmail(data.Email)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		s.cfg.Logger().Error("[CreateUser] Failed to get user by email", zap.Error(err))
-		return err
+		return fiber.NewError(http.StatusInternalServerError, "Failed toget user by email")
 	}
 
 	if existingUser != nil {
@@ -59,7 +59,7 @@ func (s *userService) CreateUser(data *request.RegisterUserRequest) error {
 	tx, err := s.db.Begin()
 	if err != nil {
 		s.cfg.Logger().Error("[CreateUser] Failed to begin transaction", zap.Error(err))
-		return err
+		return fiber.NewError(http.StatusInternalServerError, "Failed to begin transaction")
 	}
 
 	err = s.userRepo.SaveTx(user, tx)
@@ -91,7 +91,7 @@ func (s *userService) CreateUser(data *request.RegisterUserRequest) error {
 	err = tx.Commit()
 	if err != nil {
 		s.cfg.Logger().Error("[CreateUser] Failed to commit transaction", zap.Error(err))
-		return err
+		return fiber.NewError(http.StatusInternalServerError, "Failed to commit transaction")
 	}
 
 	verifyUrl := s.cfg.AppURL() + constants.UserVerifyEmailPath + fmt.Sprintf("?secret_code=%s&id=%s", userVerifyEmail.SecretCode, userVerifyEmail.ID)
@@ -146,7 +146,7 @@ func (s *userService) Login(data *request.LoginRequest) (string, error) {
 		}
 
 		s.cfg.Logger().Error("[Login] Failed to get user by email", zap.Error(err))
-		return "", err
+		return "", fiber.NewError(http.StatusInternalServerError, "Failed to get user by email")
 	}
 
 	isMatch := util.CheckPasswordHash(data.Password, existingUser.Password)
@@ -162,4 +162,68 @@ func (s *userService) Login(data *request.LoginRequest) (string, error) {
 	}
 
 	return token, nil
+}
+
+func (s *userService) VerifyEmail(secretCode string, id string) error {
+
+	uve, err := s.userRepo.GetUserVerifyEmailByID(id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			s.cfg.Logger().Error("[VerifyEmail] User verify email not found", zap.Error(err))
+
+			return fiber.NewError(http.StatusBadRequest, "Not found")
+		}
+
+		s.cfg.Logger().Error("[VerifyEmail] Failed to get user verify email by id", zap.Error(err))
+
+		return fiber.NewError(http.StatusInternalServerError, "Failed to get user verify email by id")
+	}
+
+	if uve.IsUsed {
+		s.cfg.Logger().Error("[VerifyEmail] Email is already verified", zap.Error(err))
+
+		return fiber.NewError(http.StatusBadRequest, "Email is already verified")
+	}
+
+	if uve.SecretCode != secretCode {
+		s.cfg.Logger().Error("[VerifyEmail] Invalid secret code", zap.Error(err))
+
+		return fiber.NewError(http.StatusBadRequest, "Invalid email link")
+	}
+
+	if uve.ExpiredAt.Before(time.Now()) {
+		s.cfg.Logger().Error("[VerifyEmail] Verify email link is expired", zap.Error(err))
+
+		return fiber.NewError(http.StatusBadRequest, "Verify email link is expired")
+	}
+
+	tx, err := s.db.Begin()
+	if err != nil {
+		s.cfg.Logger().Error("[CreateUser] Failed to begin transaction", zap.Error(err))
+		return fiber.NewError(http.StatusInternalServerError, "Failed to begin transaction")
+	}
+
+	err = s.userRepo.SetUserVerifyEmailToUsedTx(id, tx)
+	if err != nil {
+		s.cfg.Logger().Error("[VerifyEmail] Failed to set user verify email to used", zap.Error(err))
+		tx.Rollback()
+
+		return fiber.NewError(http.StatusInternalServerError, "Failed to set user verify email to used")
+	}
+
+	err = s.userRepo.SetUserToEmailVerifiedTx(uve.UserID, tx)
+	if err != nil {
+		s.cfg.Logger().Error("[VerifyEmail] Failed to set user to email verified", zap.Error(err))
+		tx.Rollback()
+
+		return fiber.NewError(http.StatusInternalServerError, "Failed to set user to email verified")
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		s.cfg.Logger().Error("[VerifyEmail] Failed to commit transaction", zap.Error(err))
+		return fiber.NewError(http.StatusInternalServerError, "Failed to commit transaction")
+	}
+
+	return nil
 }

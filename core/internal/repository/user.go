@@ -56,3 +56,48 @@ func (r *userRepository) SaveUserVerifyEmailTx(userVerifyEmail *model.UserVerify
 
 	return nil
 }
+
+func (r *userRepository) GetUserVerifyEmailByID(id string) (*model.UserVerifyEmail, error) {
+	userVerifyEmail := &model.UserVerifyEmail{}
+
+	err := r.db.NewSelect().Model(userVerifyEmail).Where("id = ?", id).Scan(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	return userVerifyEmail, nil
+}
+
+func (r *userRepository) SetUserToEmailVerifiedTx(id string, tx bun.Tx) error {
+	user := &model.User{}
+	user.IsEmailVerified = true
+
+	_, err := tx.NewUpdate().
+		Model(user).
+		Column("is_email_verified").
+		Where("id = ?", id).
+		Exec(context.Background())
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *userRepository) SetUserVerifyEmailToUsed(id string, tx bun.Tx) error {
+	userVerifyEmail := &model.UserVerifyEmail{}
+	userVerifyEmail.IsUsed = true
+
+	_, err := tx.NewUpdate().
+		Model(userVerifyEmail).
+		Column("is_used").
+		Where("id = ?", id).
+		Exec(context.Background())
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
