@@ -135,3 +135,11 @@ func (c *AppConfig) DBConnString() string {
 func (c *AppConfig) UserSecretCodeExpiryMins() int {
 	return c.App.UserSecretCodeExpiryMins
 }
+
+func (c *AppConfig) RabbitMQURL() string {
+	return c.Rmq.URL
+}
+
+func (c *AppConfig) RabbitMQChannel() string {
+	return c.Rmq.Channel
+}

@@ -5,9 +5,9 @@ const (
 
 	//user routes
 	UserBasePathV1      = V1BasePath + "/user"
-	UserRegisterPath    = UserBasePathV1 + "/register"
-	UserLoginPath       = UserBasePathV1 + "/login"
-	UserVerifyEmailPath = UserBasePathV1 + "/verify/email"
+	UserRegisterPath    = "/register"
+	UserLoginPath       = "/login"
+	UserVerifyEmailPath = "/verify/email"
 )
 
 // role
