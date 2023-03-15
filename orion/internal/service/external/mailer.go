@@ -2,7 +2,6 @@ package external
 
 import (
 	"context"
-	"errors"
 	"github.com/andibalo/ramein/orion/internal/config"
 	sendinblue "github.com/sendinblue/APIv3-go-library/v2/lib"
 	"go.uber.org/zap"
@@ -68,17 +67,9 @@ func (s *sendInBlueWrapper) SendEmail(data SendEmailReq) error {
 		Subject: data.Subject,
 	}
 
-	if data.HtmlContent != "" || data.TextContent != "" {
-		s.cfg.Logger().Error("Must specify either html content or text content")
-
-		return errors.New("Must specify either html content or text content")
-	}
-
 	if data.HtmlContent != "" {
 		req.HtmlContent = data.HtmlContent
-	}
-
-	if data.HtmlContent != "" {
+	} else {
 		req.TextContent = data.TextContent
 	}
 

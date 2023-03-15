@@ -41,6 +41,7 @@ func (p *pubsub) CoreNewUserRegisteredHandler(c context.Context, message rabbitm
 	}
 
 	buf := new(bytes.Buffer)
+
 	if err = t.Execute(buf, data); err != nil {
 		p.Config.Logger().Error("Error binding data to template", zap.Error(err))
 		return err
@@ -52,8 +53,8 @@ func (p *pubsub) CoreNewUserRegisteredHandler(c context.Context, message rabbitm
 
 	sendEmailReq := external.SendEmailReq{
 		Subject:        "Welcome to Ramein!",
-		RecipientName:  data.Email,
-		RecipientEmail: data.FirstName + " " + data.LastName,
+		RecipientName:  data.FirstName + " " + data.LastName,
+		RecipientEmail: data.Email,
 		HtmlContent:    emailBody,
 	}
 
