@@ -85,7 +85,7 @@ func (r *userRepository) SetUserToEmailVerifiedTx(id string, tx bun.Tx) error {
 	return nil
 }
 
-func (r *userRepository) SetUserVerifyEmailToUsed(id string, tx bun.Tx) error {
+func (r *userRepository) SetUserVerifyEmailToUsedTx(id string, tx bun.Tx) error {
 	userVerifyEmail := &model.UserVerifyEmail{}
 	userVerifyEmail.IsUsed = true
 
