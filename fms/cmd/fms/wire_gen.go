@@ -12,6 +12,7 @@ import (
 	"fms/internal/data"
 	"fms/internal/server"
 	"fms/internal/service"
+	"fms/third_party/google"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -28,10 +29,15 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	if err != nil {
 		return nil, nil, err
 	}
+
+	gcsClient := google.NewGoogleCloudStorageClient(log.NewHelper(logger))
 	greeterRepo := data.NewGreeterRepo(dataData, logger)
 	greeterUsecase := biz.NewGreeterUsecase(greeterRepo, logger)
 	greeterService := service.NewGreeterService(greeterUsecase)
-	grpcServer := server.NewGRPCServer(confServer, greeterService, logger)
+	gcsRepo := data.NewGoogleCloudStorageRepo(gcsClient, logger)
+	fileUsecase := biz.NewFileUsecase(logger, gcsRepo)
+	fileService := service.NewFileService(fileUsecase)
+	grpcServer := server.NewGRPCServer(confServer, greeterService, fileService, logger)
 	httpServer := server.NewHTTPServer(confServer, greeterService, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {

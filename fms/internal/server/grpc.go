@@ -1,6 +1,7 @@
 package server
 
 import (
+	fileV1 "fms/api/file/v1"
 	v1 "fms/api/helloworld/v1"
 	"fms/internal/conf"
 	"fms/internal/service"
@@ -11,7 +12,7 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, greeter *service.GreeterService, logger log.Logger) *grpc.Server {
+func NewGRPCServer(c *conf.Server, greeter *service.GreeterService, file *service.FileService, logger log.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
@@ -28,5 +29,7 @@ func NewGRPCServer(c *conf.Server, greeter *service.GreeterService, logger log.L
 	}
 	srv := grpc.NewServer(opts...)
 	v1.RegisterGreeterServer(srv, greeter)
+	fileV1.RegisterFileServer(srv, file)
+
 	return srv
 }
