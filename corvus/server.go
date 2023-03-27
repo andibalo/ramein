@@ -3,6 +3,8 @@ package corvus
 import (
 	"fmt"
 	"github.com/andibalo/ramein/corvus/internal/config"
+	"github.com/andibalo/ramein/corvus/internal/proto"
+	"github.com/andibalo/ramein/corvus/internal/service"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"net"
@@ -22,6 +24,10 @@ func NewGRPCServer(cfg config.Config) *GRPCServer {
 	}
 
 	s := grpc.NewServer()
+
+	healthCheckService := service.NewHealthCheckService()
+
+	proto.RegisterHealthCheckServer(s, healthCheckService)
 
 	return &GRPCServer{
 		listener:   lis,

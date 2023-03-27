@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	AppAddress         = ":8082"
+	AppPort            = ":8082"
 	EnvDevEnvironment  = "DEV"
 	EnvProdEnvironment = "PROD"
 )
@@ -76,5 +76,5 @@ func (c *AppConfig) AppEnv() string {
 }
 
 func (c *AppConfig) AppAddress() string {
-	return AppAddress
+	return c.App.AppUrl + AppPort
 }
