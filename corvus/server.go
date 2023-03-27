@@ -26,8 +26,10 @@ func NewGRPCServer(cfg config.Config) *GRPCServer {
 	s := grpc.NewServer()
 
 	healthCheckService := service.NewHealthCheckService()
+	fileService := service.NewFileService()
 
 	proto.RegisterHealthCheckServer(s, healthCheckService)
+	proto.RegisterFileServer(s, fileService)
 
 	return &GRPCServer{
 		listener:   lis,
