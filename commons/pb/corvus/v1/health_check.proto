@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package file;
+
+import "google/protobuf/empty.proto";
+
+option go_package = "github.com/andibalo/ramein/commons/pb/corvus/v1";
+option java_multiple_files = true;
+option java_package = "api.file.v1";
+
+service HealthCheck {
+  rpc HealthCheck (google.protobuf.Empty) returns (HealthCheckResponse);
+}
+
+
+message HealthCheckResponse {
+  string status = 1;
+}
