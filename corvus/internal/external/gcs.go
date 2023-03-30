@@ -20,14 +20,16 @@ type googleCloudStorageRepo struct {
 	cfg config.Config
 }
 
-func NewGoogleCloudStorageClient(cfg config.Config) *storage.Client {
-	os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "../../ramein-381009-6aa75cc8440d.json")
+func NewGoogleCloudStorageClient(cfg config.Config) (*storage.Client, error) {
+	os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "ramein-381009-6aa75cc8440d.json")
 	client, err := storage.NewClient(context.Background())
 	if err != nil {
 		cfg.Logger().Error("Failed to create google storage client", zap.Error(err))
+
+		return nil, err
 	}
 
-	return client
+	return client, nil
 }
 
 func NewGoogleCloudStorageRepo(gcs *storage.Client, cfg config.Config) *googleCloudStorageRepo {

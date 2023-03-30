@@ -3,6 +3,7 @@ package corvus
 import (
 	"fmt"
 	"github.com/andibalo/ramein/corvus/internal/config"
+	"github.com/andibalo/ramein/corvus/internal/external"
 	"github.com/andibalo/ramein/corvus/internal/proto"
 	"github.com/andibalo/ramein/corvus/internal/service"
 	"go.uber.org/zap"
@@ -25,8 +26,16 @@ func NewGRPCServer(cfg config.Config) *GRPCServer {
 
 	s := grpc.NewServer()
 
+	gcsCl, err := external.NewGoogleCloudStorageClient(cfg)
+	if err != nil {
+		cfg.Logger().Error("unable to initialize gcs client", zap.Error(err))
+		panic(err)
+	}
+
+	gcsRepo := external.NewGoogleCloudStorageRepo(gcsCl, cfg)
+
 	healthCheckService := service.NewHealthCheckService()
-	fileService := service.NewFileService()
+	fileService := service.NewFileService(gcsRepo, cfg)
 
 	proto.RegisterHealthCheckServer(s, healthCheckService)
 	proto.RegisterFileServer(s, fileService)
