@@ -20,8 +20,7 @@ type Config interface {
 
 	AppEnv() string
 	AppAddress() string
-
-	DBConnString() string
+	DbUserName() string
 }
 
 type AppConfig struct {
@@ -40,13 +39,10 @@ type app struct {
 }
 
 type db struct {
-	DSN      string
+	Uri      string
 	User     string
 	Password string
 	Name     string
-	Host     string
-	Port     int
-	MaxPool  int
 }
 
 func InitConfig() *AppConfig {
@@ -71,13 +67,10 @@ func InitConfig() *AppConfig {
 			AppID:       viper.GetString("APP_ID"),
 		},
 		Db: db{
-			DSN:      getRequiredString("DB_DSN"),
-			User:     viper.GetString("DB_USER"),
-			Password: viper.GetString("DB_PASSWORD"),
-			Host:     viper.GetString("DB_HOST"),
-			Port:     viper.GetInt("DB_PORT"),
-			Name:     viper.GetString("DB_NAME"),
-			MaxPool:  viper.GetInt("DB_MAX_POOLING_CONNECTION"),
+			Uri:      getRequiredString("NEO4J_DB_URI"),
+			User:     viper.GetString("NEO4J_DB_USER"),
+			Password: viper.GetString("NEO4J_DB_PASSWORD"),
+			Name:     viper.GetString("NEO4J_DB_NAME"),
 		},
 	}
 }
@@ -98,14 +91,14 @@ func (c *AppConfig) StorageConfig() db {
 	return c.Db
 }
 
+func (c *AppConfig) DbUserName() string {
+	return c.Db.User
+}
+
 func (c *AppConfig) AppEnv() string {
 	return c.App.AppEnv
 }
 
 func (c *AppConfig) AppAddress() string {
 	return AppAddress
-}
-
-func (c *AppConfig) DBConnString() string {
-	return c.StorageConfig().DSN
 }

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/andibalo/ramein/phoenix"
+	"github.com/andibalo/ramein/phoenix/internal/db"
 
 	"github.com/andibalo/ramein/phoenix/internal/config"
 	"github.com/spf13/viper"
@@ -20,7 +22,13 @@ func main() {
 
 	cfg := config.InitConfig()
 
-	server := phoenix.NewServer(cfg)
+	ctx := context.Background()
+
+	driver := db.InitDB(ctx, cfg)
+
+	defer driver.Close(ctx)
+
+	server := phoenix.NewServer(ctx, cfg, driver)
 
 	err = server.Start(cfg.AppAddress())
 
