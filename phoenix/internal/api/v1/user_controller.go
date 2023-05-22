@@ -106,7 +106,7 @@ func (h *UserController) GetFriendsList(c *gin.Context) {
 		return
 	}
 
-	users, err := h.userService.GetFriendsList(c.Param("user_id"), req)
+	users, pagination, err := h.userService.GetFriendsList(c.Param("user_id"), req)
 
 	if err != nil {
 		h.cfg.Logger().Error("[GetFriendsList] Error fetching friends list", zap.Error(err))
@@ -114,5 +114,5 @@ func (h *UserController) GetFriendsList(c *gin.Context) {
 		return
 	}
 
-	httpresp.HttpRespSuccess(c, users, nil)
+	httpresp.HttpRespSuccess(c, users, pagination)
 }

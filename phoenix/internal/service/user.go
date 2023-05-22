@@ -2,8 +2,10 @@ package service
 
 import (
 	"errors"
+	commonsUtil "github.com/andibalo/ramein/commons/util"
 	"github.com/andibalo/ramein/phoenix/internal/apperr"
 	"github.com/andibalo/ramein/phoenix/internal/config"
+	"github.com/andibalo/ramein/phoenix/internal/httpresp"
 	"github.com/andibalo/ramein/phoenix/internal/model"
 	"github.com/andibalo/ramein/phoenix/internal/repository"
 	"github.com/andibalo/ramein/phoenix/internal/request"
@@ -95,13 +97,31 @@ func (s *userService) AcceptFriendRequest(req request.AcceptFriendRequestReq) er
 	return nil
 }
 
-func (s *userService) GetFriendsList(userID string, req request.GetFriendsListReq) ([]model.User, error) {
+func (s *userService) GetFriendsList(userID string, req request.GetFriendsListReq) ([]model.User, *httpresp.Pagination, error) {
 
-	userFriends, err := s.userRepo.FetchFriendsListByUserID(userID, req)
-	if err != nil {
-		s.cfg.Logger().Error("[GetFriendsList] Error fetching user friends list", zap.Error(err))
-		return nil, err
+	req.Limit = commonsUtil.ValidateLimit(req.Limit)
+	req.Page = commonsUtil.ValidatePage(req.Page)
+
+	pagination := &httpresp.Pagination{
+		CurrentPage:     int64(req.Page),
+		CurrentElements: 0,
+		TotalPages:      0,
+		TotalElements:   0,
 	}
 
-	return userFriends, nil
+	userFriends, totalRecords, err := s.userRepo.FetchFriendsListByUserID(userID, req)
+	if err != nil {
+		s.cfg.Logger().Error("[GetFriendsList] Error fetching user friends list", zap.Error(err))
+		return nil, pagination, err
+	}
+
+	totalPage := totalRecords / int64(req.Limit)
+	if totalRecords%int64(req.Limit) > 0 || totalRecords == 0 {
+		totalPage++
+	}
+	pagination.TotalPages = totalPage
+	pagination.CurrentElements = int64(len(userFriends))
+	pagination.TotalElements = totalRecords
+
+	return userFriends, pagination, nil
 }

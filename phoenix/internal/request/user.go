@@ -15,6 +15,6 @@ type AcceptFriendRequestReq struct {
 }
 
 type GetFriendsListReq struct {
-	Page  int64 `json:"page"`
-	Limit int64 `json:"limit"`
+	Page  int `json:"page"`
+	Limit int `json:"limit"`
 }

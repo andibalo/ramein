@@ -152,7 +152,7 @@ func (r *userRepo) FetchUserByUserID(coreUserID string) (model.User, error) {
 	return user, nil
 }
 
-func (r *userRepo) FetchFriendsListByUserID(userID string, req request.GetFriendsListReq) ([]model.User, error) {
+func (r *userRepo) FetchFriendsListByUserID(userID string, req request.GetFriendsListReq) ([]model.User, int64, error) {
 
 	session := r.db.NewSession(r.ctx, neo4j.SessionConfig{DatabaseName: r.cfg.DbUserName()})
 	defer session.Close(r.ctx)
@@ -162,6 +162,7 @@ func (r *userRepo) FetchFriendsListByUserID(userID string, req request.GetFriend
 	}
 
 	users := []model.User{}
+	totalRecords := int64(0)
 
 	_, err := session.ExecuteRead(r.ctx, func(tx neo4j.ManagedTransaction) (any, error) {
 
@@ -193,14 +194,39 @@ func (r *userRepo) FetchFriendsListByUserID(userID string, req request.GetFriend
 
 			users = append(users, userFriend)
 		}
-		return nil, result.Err()
+
+		if result.Err() != nil {
+			return nil, result.Err()
+		}
+
+		countQuery := `
+			MATCH (userFriends:User)-[:IS_FRIENDS_WITH]->(user:User{coreUserId: $core_user_id})
+			RETURN COUNT(userFriends) AS friendsCount 
+			LIMIT $limit`
+
+		countResult, err := tx.Run(r.ctx, countQuery, map[string]any{
+			"core_user_id": userID,
+			"limit":        req.Limit,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		for countResult.Next(r.ctx) {
+
+			res, _ := countResult.Record().Get("friendsCount")
+
+			totalRecords = res.(int64)
+		}
+
+		return nil, countResult.Err()
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, totalRecords, err
 	}
 
-	return users, nil
+	return users, totalRecords, nil
 }
 
 func (r *userRepo) SaveFriendRequestRelationship(userID, targetUserID string) error {
