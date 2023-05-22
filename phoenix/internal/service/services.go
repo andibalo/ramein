@@ -7,4 +7,6 @@ import (
 
 type UserService interface {
 	GetUsersList(req request.GetUsersListReq) ([]model.User, error)
+	SendFriendRequest(req request.SendFriendRequestReq) error
+	AcceptFriendRequest(req request.AcceptFriendRequestReq) error
 }

@@ -32,6 +32,8 @@ func (h *UserController) AddRoutes(r *gin.Engine) {
 	uc := r.Group(constants.V1BasePath + userBasePath)
 
 	uc.GET("/", h.GetUsersList)
+	uc.POST("/friend/request", h.SendFriendRequest)
+	uc.POST("/friend/request/accept", h.AcceptFriendRequest)
 }
 
 func (h *UserController) GetUsersList(c *gin.Context) {
@@ -52,4 +54,44 @@ func (h *UserController) GetUsersList(c *gin.Context) {
 	}
 
 	httpresp.HttpRespSuccess(c, users, nil)
+}
+
+func (h *UserController) SendFriendRequest(c *gin.Context) {
+
+	var req request.SendFriendRequestReq
+
+	if err := c.BindJSON(&req); err != nil {
+		httpresp.HttpRespError(c, apperr.ErrBadRequest)
+		return
+	}
+
+	err := h.userService.SendFriendRequest(req)
+
+	if err != nil {
+		h.cfg.Logger().Error("[SendFriendRequest] Error sending friend request", zap.Error(err))
+		httpresp.HttpRespError(c, err)
+		return
+	}
+
+	httpresp.HttpRespSuccess(c, nil, nil)
+}
+
+func (h *UserController) AcceptFriendRequest(c *gin.Context) {
+
+	var req request.AcceptFriendRequestReq
+
+	if err := c.BindJSON(&req); err != nil {
+		httpresp.HttpRespError(c, apperr.ErrBadRequest)
+		return
+	}
+
+	err := h.userService.AcceptFriendRequest(req)
+
+	if err != nil {
+		h.cfg.Logger().Error("[AcceptFriendRequest] Error accepting friend request", zap.Error(err))
+		httpresp.HttpRespError(c, err)
+		return
+	}
+
+	httpresp.HttpRespSuccess(c, nil, nil)
 }
