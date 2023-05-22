@@ -13,3 +13,8 @@ type AcceptFriendRequestReq struct {
 	UserID       string `json:"user_id"`
 	TargetUserID string `json:"target_user_id"`
 }
+
+type GetFriendsListReq struct {
+	Page  int64 `json:"page"`
+	Limit int64 `json:"limit"`
+}

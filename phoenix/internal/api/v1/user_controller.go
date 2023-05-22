@@ -34,6 +34,7 @@ func (h *UserController) AddRoutes(r *gin.Engine) {
 	uc.GET("/", h.GetUsersList)
 	uc.POST("/friend/request", h.SendFriendRequest)
 	uc.POST("/friend/request/accept", h.AcceptFriendRequest)
+	uc.GET("/friend/list/:user_id", h.GetFriendsList)
 }
 
 func (h *UserController) GetUsersList(c *gin.Context) {
@@ -94,4 +95,24 @@ func (h *UserController) AcceptFriendRequest(c *gin.Context) {
 	}
 
 	httpresp.HttpRespSuccess(c, nil, nil)
+}
+
+func (h *UserController) GetFriendsList(c *gin.Context) {
+
+	var req request.GetFriendsListReq
+
+	if err := c.BindQuery(&req); err != nil {
+		httpresp.HttpRespError(c, apperr.ErrBadRequest)
+		return
+	}
+
+	users, err := h.userService.GetFriendsList(c.Param("user_id"), req)
+
+	if err != nil {
+		h.cfg.Logger().Error("[GetFriendsList] Error fetching friends list", zap.Error(err))
+		httpresp.HttpRespError(c, err)
+		return
+	}
+
+	httpresp.HttpRespSuccess(c, users, nil)
 }

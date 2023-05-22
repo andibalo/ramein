@@ -152,6 +152,57 @@ func (r *userRepo) FetchUserByUserID(coreUserID string) (model.User, error) {
 	return user, nil
 }
 
+func (r *userRepo) FetchFriendsListByUserID(userID string, req request.GetFriendsListReq) ([]model.User, error) {
+
+	session := r.db.NewSession(r.ctx, neo4j.SessionConfig{DatabaseName: r.cfg.DbUserName()})
+	defer session.Close(r.ctx)
+
+	if req.Limit < 1 {
+		req.Limit = 10
+	}
+
+	users := []model.User{}
+
+	_, err := session.ExecuteRead(r.ctx, func(tx neo4j.ManagedTransaction) (any, error) {
+
+		query := `
+			MATCH (userFriends:User)-[:IS_FRIENDS_WITH]->(user:User{coreUserId: $core_user_id})
+			RETURN userFriends 
+			LIMIT $limit`
+
+		result, err := tx.Run(r.ctx, query, map[string]any{
+			"core_user_id": userID,
+			"limit":        req.Limit,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		for result.Next(r.ctx) {
+
+			var userFriend model.User
+
+			u := result.Record().Values[0].(neo4j.Node)
+			userFriend.ID = u.GetId()
+			userFriend.FirstName = u.Props["firstName"].(string)
+			userFriend.LastName = u.Props["lastName"].(string)
+			userFriend.CoreUserID = u.Props["coreUserId"].(string)
+			userFriend.Gender = u.Props["gender"].(string)
+			userFriend.Email = u.Props["email"].(string)
+			userFriend.PhoneNumber = u.Props["phoneNumber"].(string)
+
+			users = append(users, userFriend)
+		}
+		return nil, result.Err()
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
 func (r *userRepo) SaveFriendRequestRelationship(userID, targetUserID string) error {
 
 	session := r.db.NewSession(r.ctx, neo4j.SessionConfig{DatabaseName: r.cfg.DbUserName()})

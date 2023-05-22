@@ -94,3 +94,14 @@ func (s *userService) AcceptFriendRequest(req request.AcceptFriendRequestReq) er
 
 	return nil
 }
+
+func (s *userService) GetFriendsList(userID string, req request.GetFriendsListReq) ([]model.User, error) {
+
+	userFriends, err := s.userRepo.FetchFriendsListByUserID(userID, req)
+	if err != nil {
+		s.cfg.Logger().Error("[GetFriendsList] Error fetching user friends list", zap.Error(err))
+		return nil, err
+	}
+
+	return userFriends, nil
+}
