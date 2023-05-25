@@ -12,4 +12,5 @@ type UserRepository interface {
 	SaveFriendRequestRelationship(userID, targetUserID string) error
 	SaveIsFriendsWithRelationship(userID, targetUserID string) error
 	CheckIsFriendsWithRelationshipExist(userID, targetUserID string) (bool, error)
+	DeleteUserFriendByUserID(userID, targetUserID string) error
 }

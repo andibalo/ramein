@@ -18,3 +18,8 @@ type GetFriendsListReq struct {
 	Page  int `json:"page"`
 	Limit int `json:"limit"`
 }
+
+type RemoveFriendReq struct {
+	UserID       string `json:"user_id"`
+	TargetUserID string `json:"target_user_id"`
+}

@@ -11,4 +11,5 @@ type UserService interface {
 	SendFriendRequest(req request.SendFriendRequestReq) error
 	AcceptFriendRequest(req request.AcceptFriendRequestReq) error
 	GetFriendsList(userID string, req request.GetFriendsListReq) ([]model.User, *httpresp.Pagination, error)
+	RemoveFriend(req request.RemoveFriendReq) error
 }

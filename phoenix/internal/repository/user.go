@@ -335,3 +335,34 @@ func (r *userRepo) CheckIsFriendsWithRelationshipExist(userID, targetUserID stri
 
 	return isFriends, nil
 }
+
+func (r *userRepo) DeleteUserFriendByUserID(userID, targetUserID string) error {
+
+	session := r.db.NewSession(r.ctx, neo4j.SessionConfig{DatabaseName: r.cfg.DbUserName()})
+	defer session.Close(r.ctx)
+
+	_, err := session.ExecuteWrite(r.ctx, func(tx neo4j.ManagedTransaction) (any, error) {
+
+		query := `
+			MATCH (user:User{coreUserId : $core_user_id})-[ifw:IS_FRIENDS_WITH]-(targetUser:User{coreUserId : $target_core_user_id})
+			MATCH (user)-[hfr:HAS_FRIEND_REQUESTED]-(targetUser)
+			DELETE ifw,hfr`
+
+		result, err := tx.Run(r.ctx, query, map[string]any{
+			"core_user_id":        userID,
+			"target_core_user_id": targetUserID,
+		})
+
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, result.Err()
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

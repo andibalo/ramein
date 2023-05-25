@@ -17,7 +17,7 @@ type userService struct {
 	userRepo repository.UserRepository
 }
 
-func NewUserService(cfg config.Config, userRepo repository.UserRepository) *userService {
+func NewUserService(cfg config.Config, userRepo repository.UserRepository) UserService {
 	return &userService{
 		cfg:      cfg,
 		userRepo: userRepo,
@@ -124,4 +124,28 @@ func (s *userService) GetFriendsList(userID string, req request.GetFriendsListRe
 	pagination.TotalElements = totalRecords
 
 	return userFriends, pagination, nil
+}
+
+func (s *userService) RemoveFriend(req request.RemoveFriendReq) error {
+
+	isAlreadyFriends, err := s.userRepo.CheckIsFriendsWithRelationshipExist(req.UserID, req.TargetUserID)
+	if err != nil {
+		if !errors.Is(err, apperr.ErrNotFound) {
+			s.cfg.Logger().Error("[RemoveFriend] Error fetching IS_FRIENDS_WITH relationship", zap.Error(err))
+			return err
+		}
+	}
+
+	if !isAlreadyFriends {
+		s.cfg.Logger().Info("[RemoveFriend] User is not friends with target user")
+		return nil
+	}
+
+	err = s.userRepo.DeleteUserFriendByUserID(req.UserID, req.TargetUserID)
+	if err != nil {
+		s.cfg.Logger().Info("[RemoveFriend] Unable to delete user friend by user id")
+		return err
+	}
+
+	return nil
 }

@@ -35,6 +35,7 @@ func (h *UserController) AddRoutes(r *gin.Engine) {
 	uc.POST("/friend/request", h.SendFriendRequest)
 	uc.POST("/friend/request/accept", h.AcceptFriendRequest)
 	uc.GET("/friend/list/:user_id", h.GetFriendsList)
+	uc.DELETE("/friend", h.RemoveFriend)
 }
 
 func (h *UserController) GetUsersList(c *gin.Context) {
@@ -115,4 +116,24 @@ func (h *UserController) GetFriendsList(c *gin.Context) {
 	}
 
 	httpresp.HttpRespSuccess(c, users, pagination)
+}
+
+func (h *UserController) RemoveFriend(c *gin.Context) {
+
+	var req request.RemoveFriendReq
+
+	if err := c.BindJSON(&req); err != nil {
+		httpresp.HttpRespError(c, apperr.ErrBadRequest)
+		return
+	}
+
+	err := h.userService.RemoveFriend(req)
+
+	if err != nil {
+		h.cfg.Logger().Error("[RemoveFriend] Error removing friend", zap.Error(err))
+		httpresp.HttpRespError(c, err)
+		return
+	}
+
+	httpresp.HttpRespSuccess(c, nil, nil)
 }
