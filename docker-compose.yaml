@@ -25,6 +25,16 @@ services:
     ports:
       - "5432:5432"
 
+  core:
+    build:
+      context: ./core
+      dockerfile: Dockerfile
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    ports:
+      - "8000:8000"
 
 networks:
   rabbitmq_net:
