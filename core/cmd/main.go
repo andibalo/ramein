@@ -34,7 +34,7 @@ func main() {
 	cfg.Logger().Info("Running cleanup tasks...")
 
 	// Your cleanup tasks go here
-	// db.Close()
-	// redisConn.Close()
+
+	database.Close()
 	cfg.Logger().Info("Fiber was successful shutdown.")
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
 	"github.com/uptrace/bun/extra/bundebug"
+	"go.uber.org/zap"
 )
 
 func InitDB(cfg config.Config) *bun.DB {
@@ -28,7 +29,7 @@ func InitDB(cfg config.Config) *bun.DB {
 	err := pgdb.Ping()
 
 	if err != nil {
-		cfg.Logger().Error("Failed to connect to db")
+		cfg.Logger().Error("Failed to connect to db", zap.Error(err))
 		panic("Failed to connect to db")
 	}
 
