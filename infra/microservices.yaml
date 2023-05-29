@@ -79,7 +79,7 @@ spec:
             - name: APP_ID
               value: "CORE"
             - name: DB_DSN
-              value: "postgres://postgres:postgres@ramein-postgres-service:5432/core_db?sslmode=disable"
+              value: "postgres://postgres:postgres@ramein-core-postgres-service:5432/core_db?sslmode=disable"
             - name: DB_USER
               value: "postgres"
             - name: DB_PASSWORD

@@ -36,12 +36,15 @@ apiVersion: v1
 metadata:
   name: ramein-core-postgres-service
 spec:
+#  ports:
+#    - port: 5432
+#  type: ClusterIP
+  selector:
+    app: ramein-core-postgres
+  type: NodePort
   ports:
     - port: 5432
-  type: ClusterIP
-  selector:
-    app: postgres
-
+      targetPort: 5432
 ---
 # What do want?
 apiVersion: v1
