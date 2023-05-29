@@ -1,3 +1,4 @@
+# CORE DB
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -46,6 +47,55 @@ spec:
     - port: 5432
       targetPort: 5432
 ---
+# ORION DB
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ramein-orion-postgres
+spec:
+  selector:
+    matchLabels:
+      app: ramein-orion-postgres
+  replicas: 1
+  template: # template for the pods
+    metadata:
+      labels:
+        app: ramein-orion-postgres
+    spec:
+      containers:
+        - name: ramein-orion-postgres
+          image: postgres:latest
+          ports:
+            - containerPort: 5432
+          envFrom:
+            # Load the environment variables/PostgresSQL credentials
+            - configMapRef:
+                # This should be the ConfigMap name created ealier
+                name: ramein-orion-postgres-credentials
+          volumeMounts:
+            - name: postgres-persistent-storage
+              mountPath: /var/lib/postgres/data
+      volumes:
+        - name: postgres-persistent-storage
+          # pointer to the configuration of HOW we want the mount to be implemented
+          persistentVolumeClaim:
+            claimName: local-storage
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: ramein-orion-postgres-service
+spec:
+  #  ports:
+  #    - port: 5432
+  #  type: ClusterIP
+  selector:
+    app: ramein-orion-postgres
+  type: NodePort
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
 # What do want?
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -68,7 +118,7 @@ provisioner: kubernetes.io/aws-ebs
 parameters:
   type: gp2
 ---
-# LOCAL
+# LOCAL PV
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
