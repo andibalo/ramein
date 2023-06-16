@@ -4,9 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/andibalo/ramein/astra/internal/config"
+	"github.com/andibalo/ramein/astra/internal/db"
+	"github.com/andibalo/ramein/astra/internal/logger"
 	"github.com/centrifugal/centrifuge"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 	"io"
 	"log"
 	"net/http"
@@ -89,6 +93,26 @@ func authMiddleware(h http.Handler) http.Handler {
 }
 
 func main() {
+	viper.SetConfigName(".env")
+	viper.SetConfigType("env")
+	viper.AddConfigPath("./")
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(fmt.Errorf("Fatal error config file: %w \n", err))
+	}
+
+	l := logger.InitLogger()
+
+	cfg := config.InitConfig(l)
+
+	session, err := db.InitDB(cfg)
+	if err != nil {
+		panic(err)
+	}
+
+	defer session.Close()
+
 	node, _ := centrifuge.New(centrifuge.Config{
 		LogLevel:   centrifuge.LogLevelDebug,
 		LogHandler: handleLog,

@@ -2,10 +2,9 @@ package config
 
 import (
 	"fmt"
-	"github.com/andibalo/ramein/astra/internal/logger"
-
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"strings"
 )
 
 const (
@@ -19,11 +18,15 @@ type Config interface {
 
 	AppEnv() string
 	AppAddress() string
+
+	DBKeyspace() string
+	DBHosts() []string
 }
 
 type AppConfig struct {
 	logger *zap.Logger
 	App    app
+	Db     db
 }
 
 type app struct {
@@ -35,19 +38,14 @@ type app struct {
 	AppID       string
 }
 
-func InitConfig() *AppConfig {
-	viper.SetConfigType("env")
-	viper.SetConfigName(".env") // name of Config file (without extension)
-	viper.AddConfigPath(".")
+type db struct {
+	hosts    string
+	keyspace string
+}
 
-	if err := viper.ReadInConfig(); err != nil {
-		return &AppConfig{}
-	}
-
-	l := logger.InitLogger()
-
+func InitConfig(logger *zap.Logger) *AppConfig {
 	return &AppConfig{
-		logger: l,
+		logger: logger,
 		App: app{
 			AppEnv:      viper.GetString("APP_ENV"),
 			AppVersion:  viper.GetString("APP_VERSION"),
@@ -55,6 +53,10 @@ func InitConfig() *AppConfig {
 			Description: "chat service",
 			AppUrl:      viper.GetString("APP_URL"),
 			AppID:       viper.GetString("APP_ID"),
+		},
+		Db: db{
+			hosts:    viper.GetString("DB_HOSTS"),
+			keyspace: viper.GetString("DB_KEYSPACE"),
 		},
 	}
 }
@@ -77,4 +79,15 @@ func (c *AppConfig) AppEnv() string {
 
 func (c *AppConfig) AppAddress() string {
 	return c.App.AppUrl + AppPort
+}
+
+func (c *AppConfig) DBHosts() []string {
+
+	dbHosts := strings.Split(c.Db.hosts, ",")
+
+	return dbHosts
+}
+
+func (c *AppConfig) DBKeyspace() string {
+	return c.Db.keyspace
 }
