@@ -37,3 +37,41 @@ func CreateCluster(consistency gocql.Consistency, keyspace string, hosts ...stri
 	cluster.PoolConfig.HostSelectionPolicy = gocql.TokenAwareHostPolicy(gocql.RoundRobinHostPolicy())
 	return cluster
 }
+
+func InitKeyspaceAndTables(cfg config.Config, session gocqlx.Session) error {
+
+	err := session.ExecStmt(`CREATE KEYSPACE IF NOT EXISTS astra_ks WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 3};`)
+	if err != nil {
+		cfg.Logger().Fatal("error create keyspace", zap.Error(err))
+
+		return err
+	}
+
+	err = session.ExecStmt(`CREATE TABLE IF NOT EXISTS message_by_conversation_id(
+		conversation_id uuid,
+		message_id uuid,
+		conversation_name varchar,
+		from_user_id varchar,
+		from_user_number varchar,
+		from_user_first_name varchar,
+		from_user_last_name varchar,
+		from_user_email varchar,
+		text_content varchar,
+		sent_at timestamp,
+		seen_at timestamp,
+		created_by varchar,
+		created_at timestamp,
+		updated_by varchar,
+		updated_at timestamp,
+		deleted_by varchar,
+		deleted_at timestamp,
+		PRIMARY KEY (conversation_id, sent_at)
+	) WITH CLUSTERING ORDER BY (sent_at DESC)`)
+	if err != nil {
+		cfg.Logger().Fatal("error create message table", zap.Error(err))
+
+		return err
+	}
+
+	return nil
+}

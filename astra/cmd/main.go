@@ -7,10 +7,15 @@ import (
 	"github.com/andibalo/ramein/astra/internal/config"
 	"github.com/andibalo/ramein/astra/internal/db"
 	"github.com/andibalo/ramein/astra/internal/logger"
+	"github.com/andibalo/ramein/astra/internal/model"
+	"github.com/andibalo/ramein/astra/internal/repository"
+	"github.com/andibalo/ramein/commons/kafka"
 	"github.com/centrifugal/centrifuge"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/gocql/gocql"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 	"io"
 	"log"
 	"net/http"
@@ -111,7 +116,26 @@ func main() {
 		panic(err)
 	}
 
+	err = db.InitKeyspaceAndTables(cfg, session)
+	if err != nil {
+		panic(err)
+	}
+
 	defer session.Close()
+
+	pendingMessagesTopicSyncProducer, err := kafka.NewSyncProducer(
+		cfg.KafkaHosts(),
+		cfg.KafkaPendingMessagesTopic(),
+		kafka.WithLogger(l),
+	)
+
+	if err != nil {
+		l.Error("error init pending_messages kafka producer", zap.Error(err))
+	}
+
+	defer pendingMessagesTopicSyncProducer.Close()
+
+	messageRepo := repository.NewMessageRepository(session, cfg.Logger())
 
 	node, _ := centrifuge.New(centrifuge.Config{
 		LogLevel:   centrifuge.LogLevelDebug,
@@ -186,11 +210,19 @@ func main() {
 		client.OnPublish(func(e centrifuge.PublishEvent, cb centrifuge.PublishCallback) {
 			log.Printf("[user %s] publishes into channel %s: %s", client.UserID(), e.Channel, string(e.Data))
 
+			// channel authorization
 			if !client.IsSubscribed(e.Channel) {
 				cb(centrifuge.PublishReply{}, centrifuge.ErrorPermissionDenied)
 				return
 			}
 
+			// write message to db
+
+			// sent ack to client
+
+			// check active user connection in with Presence method
+
+			// send msg to active clients, sent to queue for non-active clients
 			var msg clientMessage
 			err := json.Unmarshal(e.Data, &msg)
 			if err != nil {
@@ -260,6 +292,39 @@ func main() {
 			})
 		}
 		c.Abort()
+	})
+
+	r.GET("/test-insert", func(c *gin.Context) {
+
+		conversationID, _ := gocql.RandomUUID()
+		messageID, _ := gocql.RandomUUID()
+
+		m := model.Message{
+			ConversationID:    conversationID,
+			MessageID:         messageID,
+			ConversationName:  "test",
+			FromUserID:        "user-id",
+			FromUserNumber:    "0929024",
+			FromUserFirstName: "andi",
+			FromUserLastName:  "balo",
+			FromUserEmail:     "andialo214@gmail.com",
+			TextContent:       "hello",
+			SentAt:            time.Now(),
+			CreatedBy:         "",
+			CreatedAt:         time.Now(),
+			UpdatedBy:         "",
+			UpdatedAt:         nil,
+			DeletedBy:         "",
+			DeletedAt:         nil,
+		}
+
+		err = messageRepo.SaveMessage(m)
+
+		if err != nil {
+			c.String(500, "fail")
+		}
+
+		c.String(200, "success")
 	})
 
 	_ = r.Run() // listen and serve on 0.0.0.0:8080

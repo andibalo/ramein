@@ -21,12 +21,18 @@ type Config interface {
 
 	DBKeyspace() string
 	DBHosts() []string
+
+	KafkaHosts() []string
+
+	KafkaPendingMessagesTopic() string
 }
 
 type AppConfig struct {
-	logger *zap.Logger
-	App    app
-	Db     db
+	logger      *zap.Logger
+	App         app
+	Db          db
+	Kafka       kafka
+	KafkaTopics kafkaTopics
 }
 
 type app struct {
@@ -43,6 +49,14 @@ type db struct {
 	keyspace string
 }
 
+type kafka struct {
+	hosts string
+}
+
+type kafkaTopics struct {
+	pendingMessagesTopic string
+}
+
 func InitConfig(logger *zap.Logger) *AppConfig {
 	return &AppConfig{
 		logger: logger,
@@ -57,6 +71,12 @@ func InitConfig(logger *zap.Logger) *AppConfig {
 		Db: db{
 			hosts:    viper.GetString("DB_HOSTS"),
 			keyspace: viper.GetString("DB_KEYSPACE"),
+		},
+		Kafka: kafka{
+			hosts: viper.GetString("KAFKA_HOSTS"),
+		},
+		KafkaTopics: kafkaTopics{
+			pendingMessagesTopic: viper.GetString("KAFKA_PENDING_MESSAGES_TOPIC"),
 		},
 	}
 }
@@ -90,4 +110,15 @@ func (c *AppConfig) DBHosts() []string {
 
 func (c *AppConfig) DBKeyspace() string {
 	return c.Db.keyspace
+}
+
+func (c *AppConfig) KafkaHosts() []string {
+
+	kafkaHosts := strings.Split(c.Kafka.hosts, ",")
+
+	return kafkaHosts
+}
+
+func (c *AppConfig) KafkaPendingMessagesTopic() string {
+	return c.KafkaTopics.pendingMessagesTopic
 }
