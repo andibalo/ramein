@@ -25,6 +25,10 @@ type Config interface {
 	KafkaHosts() []string
 
 	KafkaPendingMessagesTopic() string
+
+	RedisURL() string
+	RedisPassword() string
+	RedisDB() int
 }
 
 type AppConfig struct {
@@ -33,6 +37,7 @@ type AppConfig struct {
 	Db          db
 	Kafka       kafka
 	KafkaTopics kafkaTopics
+	Redis       redis
 }
 
 type app struct {
@@ -51,6 +56,12 @@ type db struct {
 
 type kafka struct {
 	hosts string
+}
+
+type redis struct {
+	url      string
+	password string
+	db       int
 }
 
 type kafkaTopics struct {
@@ -77,6 +88,11 @@ func InitConfig(logger *zap.Logger) *AppConfig {
 		},
 		KafkaTopics: kafkaTopics{
 			pendingMessagesTopic: viper.GetString("KAFKA_PENDING_MESSAGES_TOPIC"),
+		},
+		Redis: redis{
+			url:      viper.GetString("REDIS_URL"),
+			password: viper.GetString("REDIS_PASSWORD"),
+			db:       viper.GetInt("REDIS_DB"),
 		},
 	}
 }
@@ -121,4 +137,16 @@ func (c *AppConfig) KafkaHosts() []string {
 
 func (c *AppConfig) KafkaPendingMessagesTopic() string {
 	return c.KafkaTopics.pendingMessagesTopic
+}
+
+func (c *AppConfig) RedisURL() string {
+	return c.Redis.url
+}
+
+func (c *AppConfig) RedisPassword() string {
+	return c.Redis.password
+}
+
+func (c *AppConfig) RedisDB() int {
+	return c.Redis.db
 }
